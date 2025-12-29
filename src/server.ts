@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
         .emit("ice-candidate-received", { candidate, from });
   });
 });
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 8080;
 httpServer.listen(port, () => {
   console.log("Server is running on " + port);
 });
