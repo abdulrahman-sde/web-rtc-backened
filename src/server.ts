@@ -2,6 +2,8 @@ import express from "express";
 const app = express();
 import http from "http";
 import { Server } from "socket.io";
+import "dotenv/config";
+
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -53,7 +55,7 @@ io.on("connection", (socket) => {
         .emit("ice-candidate-received", { candidate, from });
   });
 });
-
-httpServer.listen(4000, () => {
-  console.log("Server is running on http://localhost:4000");
+const port = process.env.PORT || 4000;
+httpServer.listen(port, () => {
+  console.log("Server is running on " + port);
 });
