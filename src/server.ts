@@ -54,6 +54,42 @@ io.on("connection", (socket) => {
         .to(otherPersonSocketId)
         .emit("ice-candidate-received", { candidate, from });
   });
+
+  socket.on("disconnect", () => {
+    // Find the email associated with this socket
+    let email: string | undefined;
+    for (const [e, socketId] of EmailsWithSocketIds.entries()) {
+      if (socketId === socket.id) {
+        email = e;
+        break;
+      }
+    }
+
+    if (!email) return; // exit if not found
+
+    EmailsWithSocketIds.delete(email);
+
+    // Remove user from all rooms
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      if (!room) continue;
+      const index = room.indexOf(email);
+      if (index !== -1) {
+        room.splice(index, 1);
+        socket.to(roomId).emit("user-left", { email });
+        if (room.length === 0) {
+          delete rooms[roomId]; // cleanup empty room
+        }
+      }
+    }
+
+    console.log(`User disconnected: ${email}`);
+    console.log("Current rooms:", rooms);
+    console.log(
+      "EmailsWithSocketIds:",
+      Array.from(EmailsWithSocketIds.entries())
+    );
+  });
 });
 const port = process.env.PORT || 8080;
 httpServer.listen(port, () => {
